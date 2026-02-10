@@ -5,355 +5,99 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Management System</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 20px;
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            overflow: hidden;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }
-
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-        }
-
-        .content {
-            padding: 30px;
-        }
-
-        .controls {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
-        }
-
-        .search-box {
-            flex: 1;
-            min-width: 250px;
-        }
-
-        .search-box input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #ddd;
-            border-radius: 5px;
-            font-size: 14px;
-            transition: border 0.3s;
-        }
-
-        .search-box input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        .sort-controls {
-            display: flex;
-            gap: 10px;
-        }
-
-        .sort-controls select {
-            padding: 12px 15px;
-            border: 2px solid #ddd;
-            border-radius: 5px;
-            font-size: 14px;
-            cursor: pointer;
-            background: white;
-        }
-
-        .btn {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 5px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-weight: 600;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-success {
-            background: #10b981;
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #059669;
-        }
-
-        .btn-warning {
-            background: #f59e0b;
-            color: white;
-        }
-
-        .btn-warning:hover {
-            background: #d97706;
-        }
-
-        .btn-danger {
-            background: #ef4444;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #dc2626;
-        }
-
-        .btn-sm {
-            padding: 6px 15px;
-            font-size: 12px;
-        }
-
-        .form-container {
-            background: #f9fafb;
-            padding: 25px;
-            border-radius: 8px;
-            margin-bottom: 30px;
-            display: none;
-        }
-
-        .form-container.active {
-            display: block;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #374151;
-        }
-
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #ddd;
-            border-radius: 5px;
-            font-size: 14px;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-        }
-
-        .form-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 25px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        thead {
-            background: #f3f4f6;
-        }
-
-        th {
-            padding: 15px;
-            text-align: left;
-            font-weight: 600;
-            color: #374151;
-            border-bottom: 2px solid #e5e7eb;
-        }
-
-        td {
-            padding: 15px;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        tbody tr:hover {
-            background: #f9fafb;
-        }
-
-        .actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .message {
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            display: none;
-        }
-
-        .message.success {
-            background: #d1fae5;
-            color: #065f46;
-            border: 1px solid #10b981;
-        }
-
-        .message.error {
-            background: #fee2e2;
-            color: #991b1b;
-            border: 1px solid #ef4444;
-        }
-
-        .message.active {
-            display: block;
-        }
-
-        .no-data {
-            text-align: center;
-            padding: 40px;
-            color: #6b7280;
-            font-size: 16px;
-        }
-
-        @media (max-width: 768px) {
-            .controls {
-                flex-direction: column;
-            }
-
-            table {
-                font-size: 14px;
-            }
-
-            th,
-            td {
-                padding: 10px;
-            }
-        }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>User Management System</h1>
+<body class="bg-gradient-to-br from-indigo-500 to-purple-600 min-h-screen p-5">
+    <div class="max-w-6xl mx-auto bg-white rounded-lg shadow-2xl overflow-hidden">
+        <div class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-8 text-center">
+            <h1 class="text-4xl font-bold mb-2">User Management System</h1>
             <p>Full CRUD Operations with MongoDB</p>
         </div>
 
-        <div class="content">
-            <div id="message" class="message"></div>
+        <div class="p-8">
+            <div id="message" class="hidden mb-5 p-4 rounded-lg"></div>
 
-            <div class="controls">
-                <div class="search-box">
-                    <input type="text" id="searchInput" placeholder="Search by name...">
+            <div class="flex flex-col sm:flex-row gap-4 mb-6 flex-wrap">
+                <div class="flex-1 min-w-[250px]">
+                    <input type="text" id="searchInput" placeholder="Search by name..." 
+                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 transition">
                 </div>
-                <div class="sort-controls">
-                    <select id="sortBy">
+                <div class="flex gap-3">
+                    <select id="sortBy" class="px-4 py-3 border-2 border-gray-300 rounded-lg cursor-pointer bg-white focus:outline-none focus:border-indigo-500">
                         <option value="">Sort by...</option>
                         <option value="firstName">First Name</option>
                         <option value="lastName">Last Name</option>
                         <option value="age">Age</option>
                         <option value="email">Email</option>
                     </select>
-                    <select id="sortOrder">
+                    <select id="sortOrder" class="px-4 py-3 border-2 border-gray-300 rounded-lg cursor-pointer bg-white focus:outline-none focus:border-indigo-500">
                         <option value="asc">Ascending</option>
                         <option value="desc">Descending</option>
                     </select>
                 </div>
-                <button class="btn btn-primary" onclick="toggleForm()">+ Add New User</button>
+                <button class="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold rounded-lg hover:shadow-lg hover:-translate-y-0.5 transition" onclick="toggleForm()">+ Add New User</button>
             </div>
 
-            <div id="formContainer" class="form-container">
-                <h2 id="formTitle">Add New User</h2>
+            <div id="formContainer" class="hidden bg-gray-50 p-6 rounded-lg mb-8">
+                <h2 id="formTitle" class="text-2xl font-bold mb-6">Add New User</h2>
                 <form id="userForm">
                     <input type="hidden" id="userId">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="firstName">First Name *</label>
-                            <input type="text" id="firstName" required>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
+                        <div>
+                            <label for="firstName" class="block font-semibold text-gray-700 mb-2">First Name *</label>
+                            <input type="text" id="firstName" required class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
                         </div>
-                        <div class="form-group">
-                            <label for="lastName">Last Name *</label>
-                            <input type="text" id="lastName" required>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="email">Email *</label>
-                            <input type="email" id="email" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="age">Age *</label>
-                            <input type="number" id="age" min="1" required>
+                        <div>
+                            <label for="lastName" class="block font-semibold text-gray-700 mb-2">Last Name *</label>
+                            <input type="text" id="lastName" required class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
                         </div>
                     </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="password">Password</label>
-                            <input type="password" id="password">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
+                        <div>
+                            <label for="email" class="block font-semibold text-gray-700 mb-2">Email *</label>
+                            <input type="email" id="email" required class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
                         </div>
-                        <div class="form-group">
-                            <label for="role">Role</label>
-                            <select id="role">
+                        <div>
+                            <label for="age" class="block font-semibold text-gray-700 mb-2">Age *</label>
+                            <input type="number" id="age" min="1" required class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-6">
+                        <div>
+                            <label for="password" class="block font-semibold text-gray-700 mb-2">Password</label>
+                            <input type="password" id="password" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label for="role" class="block font-semibold text-gray-700 mb-2">Role</label>
+                            <select id="role" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 bg-white">
                                 <option value="user">User</option>
                                 <option value="admin">Admin</option>
                                 <option value="moderator">Moderator</option>
                             </select>
                         </div>
                     </div>
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-success">Save User</button>
-                        <button type="button" class="btn btn-warning" onclick="cancelForm()">Cancel</button>
+                    <div class="flex gap-3">
+                        <button type="submit" class="px-6 py-3 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition">Save User</button>
+                        <button type="button" class="px-6 py-3 bg-amber-500 text-white font-semibold rounded-lg hover:bg-amber-600 transition" onclick="cancelForm()">Cancel</button>
                     </div>
                 </form>
             </div>
 
-            <table id="userTable">
-                <thead>
+            <table id="userTable" class="w-full border-collapse mt-5">
+                <thead class="bg-gray-100">
                     <tr>
-                        <th>First Name</th>
-                        <th>Last Name</th>
-                        <th>Email</th>
-                        <th>Age</th>
-                        <th>Role</th>
-                        <th>Actions</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-700 border-b-2 border-gray-300">First Name</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-700 border-b-2 border-gray-300">Last Name</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-700 border-b-2 border-gray-300">Email</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-700 border-b-2 border-gray-300">Age</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-700 border-b-2 border-gray-300">Role</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-700 border-b-2 border-gray-300">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="userTableBody">
                     <tr>
-                        <td colspan="6" class="no-data">Loading users...</td>
+                        <td colspan="6" class="text-center py-10 text-gray-500">Loading users...</td>
                     </tr>
                 </tbody>
             </table>
@@ -363,20 +107,16 @@
     <script>
         let editingUserId = null;
 
-        // Load users on page load
         document.addEventListener('DOMContentLoaded', () => {
             loadUsers();
 
-            // Search functionality
             document.getElementById('searchInput').addEventListener('input', (e) => {
                 loadUsers(e.target.value);
             });
 
-            // Sort functionality
             document.getElementById('sortBy').addEventListener('change', loadUsers);
             document.getElementById('sortOrder').addEventListener('change', loadUsers);
 
-            // Form submission
             document.getElementById('userForm').addEventListener('submit', handleFormSubmit);
         });
 
@@ -395,20 +135,20 @@
                 const tbody = document.getElementById('userTableBody');
 
                 if (users.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="no-data">No users found</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-10 text-gray-500">No users found</td></tr>';
                     return;
                 }
 
                 tbody.innerHTML = users.map(user => `
-                    <tr>
-                        <td>${user.firstName}</td>
-                        <td>${user.lastName}</td>
-                        <td>${user.email}</td>
-                        <td>${user.age}</td>
-                        <td>${user.role || '-'}</td>
-                        <td class="actions">
-                            <button class="btn btn-warning btn-sm" onclick="editUser('${user._id}')">Edit</button>
-                            <button class="btn btn-danger btn-sm" onclick="deleteUser('${user._id}')">Delete</button>
+                    <tr class="border-b border-gray-200 hover:bg-gray-50">
+                        <td class="px-4 py-3">${user.firstName}</td>
+                        <td class="px-4 py-3">${user.lastName}</td>
+                        <td class="px-4 py-3">${user.email}</td>
+                        <td class="px-4 py-3">${user.age}</td>
+                        <td class="px-4 py-3">${user.role || '-'}</td>
+                        <td class="px-4 py-3 flex gap-2">
+                            <button class="px-3 py-1 bg-amber-500 text-white text-sm font-semibold rounded hover:bg-amber-600 transition" onclick="editUser('${user._id}')">Edit</button>
+                            <button class="px-3 py-1 bg-red-500 text-white text-sm font-semibold rounded hover:bg-red-600 transition" onclick="deleteUser('${user._id}')">Delete</button>
                         </td>
                     </tr>
                 `).join('');
@@ -419,14 +159,14 @@
 
         function toggleForm() {
             const formContainer = document.getElementById('formContainer');
-            formContainer.classList.toggle('active');
-            if (!formContainer.classList.contains('active')) {
+            formContainer.classList.toggle('hidden');
+            if (formContainer.classList.contains('hidden')) {
                 resetForm();
             }
         }
 
         function cancelForm() {
-            document.getElementById('formContainer').classList.remove('active');
+            document.getElementById('formContainer').classList.add('hidden');
             resetForm();
         }
 
@@ -453,14 +193,12 @@
             try {
                 let response;
                 if (userId) {
-                    // Update existing user
                     response = await fetch(`/api/users/${userId}`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(userData)
                     });
                 } else {
-                    // Create new user
                     response = await fetch('/api/users', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -495,7 +233,7 @@
                 document.getElementById('role').value = user.role || 'user';
 
                 document.getElementById('formTitle').textContent = 'Edit User';
-                document.getElementById('formContainer').classList.add('active');
+                document.getElementById('formContainer').classList.remove('hidden');
                 editingUserId = id;
             } catch (error) {
                 showMessage('Error loading user: ' + error.message, 'error');
@@ -527,10 +265,11 @@
         function showMessage(text, type) {
             const messageDiv = document.getElementById('message');
             messageDiv.textContent = text;
-            messageDiv.className = `message ${type} active`;
+            messageDiv.classList.remove('hidden');
+            messageDiv.className = `mb-5 p-4 rounded-lg ${type === 'success' ? 'bg-green-100 text-green-800 border border-green-400' : 'bg-red-100 text-red-800 border border-red-400'}`;
 
             setTimeout(() => {
-                messageDiv.classList.remove('active');
+                messageDiv.classList.add('hidden');
             }, 5000);
         }
     </script>
