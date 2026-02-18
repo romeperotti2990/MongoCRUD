@@ -1,82 +1,100 @@
+require('dotenv').config();
 const express = require('express');
-const mongoose = require('mongoose');
-const dbURL = 'mongodb://localhost:27017/mtec';
+const { Pool } = require('pg');
+
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-mongoose.connect(dbURL);
-const db = mongoose.connection;
-db.on('error', (err) => console.error('Connection error:', err));
-
-const userSchema = new mongoose.Schema({
-    firstName: { type: String, required: true },
-    lastName: { type: String, required: true },
-    email: { type: String, required: true },
-    age: { type: Number, required: true },
-    password: String,
-    role: String
+// PostgreSQL connection pool
+const pool = new Pool({
+    host:     process.env.DB_HOST     || 'localhost',
+    port:     process.env.DB_PORT     || 5432,
+    database: process.env.DB_NAME     || 'postgres',
+    user:     process.env.DB_USER     || 'postgres',
+    password: process.env.DB_PASSWORD || '',
 });
 
-const User = mongoose.model('User', userSchema);
+// Allowed sort columns (prevents SQL injection)
+const ALLOWED_SORT_COLUMNS = {
+    id:        'id',
+    firstName: 'first_name',
+    lastName:  'last_name',
+    email:     'email',
+    age:       'age',
+};
 
-// Seed database with 10 default users (runs only if no users exist)
-async function seedDatabase() {
+// Create table and seed 10 default users if table is empty
+async function initDatabase() {
+    const client = await pool.connect();
     try {
-        const count = await User.countDocuments();
-        if (count === 0) {
-            const defaultUsers = [
-                { firstName: 'John', lastName: 'Doe', email: 'john.doe@example.com', age: 25, password: 'pass123', role: 'user' },
-                { firstName: 'Jane', lastName: 'Smith', email: 'jane.smith@example.com', age: 30, password: 'pass456', role: 'admin' },
-                { firstName: 'Alice', lastName: 'Johnson', email: 'alice.johnson@example.com', age: 28, password: 'pass789', role: 'user' },
-                { firstName: 'Bob', lastName: 'Williams', email: 'bob.williams@example.com', age: 35, password: 'pass012', role: 'user' },
-                { firstName: 'Charlie', lastName: 'Brown', email: 'charlie.brown@example.com', age: 22, password: 'pass345', role: 'user' },
-                { firstName: 'Diana', lastName: 'Miller', email: 'diana.miller@example.com', age: 27, password: 'pass678', role: 'moderator' },
-                { firstName: 'Edward', lastName: 'Davis', email: 'edward.davis@example.com', age: 40, password: 'pass901', role: 'user' },
-                { firstName: 'Fiona', lastName: 'Garcia', email: 'fiona.garcia@example.com', age: 33, password: 'pass234', role: 'user' },
-                { firstName: 'George', lastName: 'Martinez', email: 'george.martinez@example.com', age: 29, password: 'pass567', role: 'admin' },
-                { firstName: 'Hannah', lastName: 'Rodriguez', email: 'hannah.rodriguez@example.com', age: 26, password: 'pass890', role: 'user' }
-            ];
-            await User.insertMany(defaultUsers);
+        await client.query(`
+            CREATE TABLE IF NOT EXISTS users (
+                id         SERIAL PRIMARY KEY,
+                first_name VARCHAR(100) NOT NULL,
+                last_name  VARCHAR(100) NOT NULL,
+                email      VARCHAR(255) NOT NULL,
+                age        INTEGER      NOT NULL
+            )
+        `);
+
+        const { rows } = await client.query('SELECT COUNT(*) FROM users');
+        if (parseInt(rows[0].count) === 0) {
+            await client.query(`
+                INSERT INTO users (first_name, last_name, email, age) VALUES
+                ('John',    'Doe',       'john.doe@example.com',       25),
+                ('Jane',    'Smith',     'jane.smith@example.com',     30),
+                ('Alice',   'Johnson',   'alice.johnson@example.com',  28),
+                ('Bob',     'Williams',  'bob.williams@example.com',   35),
+                ('Charlie', 'Brown',     'charlie.brown@example.com',  22),
+                ('Diana',   'Miller',    'diana.miller@example.com',   27),
+                ('Edward',  'Davis',     'edward.davis@example.com',   40),
+                ('Fiona',   'Garcia',    'fiona.garcia@example.com',   33),
+                ('George',  'Martinez',  'george.martinez@example.com',29),
+                ('Hannah',  'Rodriguez', 'hannah.rodriguez@example.com',26)
+            `);
             console.log('Database seeded with 10 default users');
         }
-    } catch (error) {
-        console.error('Error seeding database:', error);
+
+        console.log('Connected to PostgreSQL and table ready');
+    } finally {
+        client.release();
     }
 }
 
-db.once('open', async () => {
-    console.log('Connected to MongoDB');
-    await seedDatabase();
-});
+// Helper: map DB row to API-friendly object
+function toUser(row) {
+    return {
+        id:        row.id,
+        firstName: row.first_name,
+        lastName:  row.last_name,
+        email:     row.email,
+        age:       row.age,
+    };
+}
 
-// API Routes
-
-// GET all users with optional search and sort
+// GET all users — supports ?search=&sortBy=&order=
 app.get('/api/users', async (req, res) => {
     try {
         const { search, sortBy, order } = req.query;
-        let query = {};
 
-        // Search functionality - search by firstName and/or lastName
+        let query  = 'SELECT * FROM users';
+        const params = [];
+
         if (search) {
-            query.$or = [
-                { firstName: { $regex: search, $options: 'i' } },
-                { lastName: { $regex: search, $options: 'i' } }
-            ];
+            params.push(`%${search}%`);
+            query += ` WHERE first_name ILIKE $1 OR last_name ILIKE $1`;
         }
 
-        // Build sort object
-        let sortObj = {};
-        if (sortBy) {
-            sortObj[sortBy] = order === 'desc' ? -1 : 1;
-        }
+        const col = ALLOWED_SORT_COLUMNS[sortBy] || 'id';
+        const dir = order === 'desc' ? 'DESC' : 'ASC';
+        query += ` ORDER BY ${col} ${dir}`;
 
-        const users = await User.find(query).sort(sortObj);
-        res.json(users);
+        const { rows } = await pool.query(query, params);
+        res.json(rows.map(toUser));
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -85,11 +103,9 @@ app.get('/api/users', async (req, res) => {
 // GET single user by ID
 app.get('/api/users/:id', async (req, res) => {
     try {
-        const user = await User.findById(req.params.id);
-        if (!user) {
-            return res.status(404).json({ error: 'User not found' });
-        }
-        res.json(user);
+        const { rows } = await pool.query('SELECT * FROM users WHERE id = $1', [req.params.id]);
+        if (rows.length === 0) return res.status(404).json({ error: 'User not found' });
+        res.json(toUser(rows[0]));
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -98,9 +114,15 @@ app.get('/api/users/:id', async (req, res) => {
 // POST create new user
 app.post('/api/users', async (req, res) => {
     try {
-        const user = new User(req.body);
-        await user.save();
-        res.status(201).json(user);
+        const { firstName, lastName, email, age } = req.body;
+        if (!firstName || !lastName || !email || age == null) {
+            return res.status(400).json({ error: 'firstName, lastName, email, and age are required' });
+        }
+        const { rows } = await pool.query(
+            'INSERT INTO users (first_name, last_name, email, age) VALUES ($1, $2, $3, $4) RETURNING *',
+            [firstName, lastName, email, parseInt(age)]
+        );
+        res.status(201).json(toUser(rows[0]));
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
@@ -109,15 +131,19 @@ app.post('/api/users', async (req, res) => {
 // PUT update existing user
 app.put('/api/users/:id', async (req, res) => {
     try {
-        const user = await User.findByIdAndUpdate(
-            req.params.id,
-            req.body,
-            { new: true, runValidators: true }
-        );
-        if (!user) {
-            return res.status(404).json({ error: 'User not found' });
+        const { firstName, lastName, email, age } = req.body;
+        if (!firstName || !lastName || !email || age == null) {
+            return res.status(400).json({ error: 'firstName, lastName, email, and age are required' });
         }
-        res.json(user);
+        const { rows } = await pool.query(
+            `UPDATE users
+             SET first_name = $1, last_name = $2, email = $3, age = $4
+             WHERE id = $5
+             RETURNING *`,
+            [firstName, lastName, email, parseInt(age), req.params.id]
+        );
+        if (rows.length === 0) return res.status(404).json({ error: 'User not found' });
+        res.json(toUser(rows[0]));
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
@@ -126,16 +152,21 @@ app.put('/api/users/:id', async (req, res) => {
 // DELETE user
 app.delete('/api/users/:id', async (req, res) => {
     try {
-        const user = await User.findByIdAndDelete(req.params.id);
-        if (!user) {
-            return res.status(404).json({ error: 'User not found' });
-        }
+        const { rows } = await pool.query('DELETE FROM users WHERE id = $1 RETURNING *', [req.params.id]);
+        if (rows.length === 0) return res.status(404).json({ error: 'User not found' });
         res.json({ message: 'User deleted successfully' });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 });
 
-app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
-});
+initDatabase()
+    .then(() => {
+        app.listen(port, () => {
+            console.log(`Server running at http://localhost:${port}`);
+        });
+    })
+    .catch((err) => {
+        console.error('Failed to initialise database:', err.message);
+        process.exit(1);
+    });
